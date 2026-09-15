@@ -2,10 +2,10 @@
 # S3 BUCKET CREATION
 ############################################
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "s3-scd-snowflake-us-west-2-tf" # Must be globally unique
+  bucket = "s3-scd-snowflake-us-east-1-tf" # Must be globally unique
 
   tags = {
-    Name        = "s3-scd-snowflake-us-west-2-tf"
+    Name        = "s3-scd-snowflake-us-east-1-tf"
     Environment = "Dev"
   }
 }
@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "my_bucket" {
 # IAM ROLE WITH S3 FULL ACCESS FOR EC2
 ############################################
 resource "aws_iam_role" "ec2_role" {
-  name = "ec2-scd-snowflake-us-west-2-tf-role"
+  name = "ec2-scd-snowflake-us-east-1-tf-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -38,7 +38,7 @@ resource "aws_iam_role_policy_attachment" "s3_full_access" {
 
 # Create Instance Profile for EC2
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2-scd-snowflake-us-west-2-tf-profile"
+  name = "ec2-scd-snowflake-us-east-1-tf-profile"
   role = aws_iam_role.ec2_role.name
 }
 
@@ -76,7 +76,7 @@ data "aws_subnets" "default" {
 
 # Security Group - allow SSH (NiFi & JupyterLab accessed via SSH tunneling)
 resource "aws_security_group" "allow_ssh" {
-  name        = "ec2-scd-snowflake-us-west-2-tf-sg"
+  name        = "ec2-scd-snowflake-us-east-1-tf-sg"
   description = "Allow SSH and ports 4000-38888 inbound traffic"
   vpc_id      = data.aws_vpc.default.id
 
@@ -110,21 +110,21 @@ resource "tls_private_key" "ssh_key" {
 
 # Register key in AWS
 resource "aws_key_pair" "keypair" {
-  key_name   = "ec2-scd-snowflake-us-west-2-tf-key"
+  key_name   = "ec2-scd-snowflake-us-east-1-tf-key"
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
 # Save private key locally
 resource "local_file" "private_key_pem" {
   content         = tls_private_key.ssh_key.private_key_pem
-  filename        = "${path.module}/ec2-scd-snowflake-us-west-2-tf.pem"
+  filename        = "${path.module}/ec2-scd-snowflake-us-east-1-tf.pem"
   file_permission = "0600"
 }
 
 # EC2 Instance
 resource "aws_instance" "ec2_instance" {
   ami                    = data.aws_ami.amazon_linux_2.id
-  instance_type          = "t2.large"
+  instance_type          = "t3.small"
   subnet_id              = data.aws_subnets.default.ids[0]
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
   key_name               = aws_key_pair.keypair.key_name
@@ -142,6 +142,6 @@ resource "aws_instance" "ec2_instance" {
   ]
 
   tags = {
-    Name = "ec2-scd-snowflake-us-west-2-tf"
+    Name = "ec2-scd-snowflake-us-east-1-tf"
   }
 }

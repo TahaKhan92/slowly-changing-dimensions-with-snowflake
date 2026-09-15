@@ -2,11 +2,11 @@
 
 This Terraform configuration provisions the AWS infrastructure required to run this SCD pipeline. It creates the following resources:
 
-- **S3 Bucket** (`s3-scd-snowflake-us-west-2-tf`) — destination for NiFi file uploads; Snowpipe reads from here
-- **EC2 Instance** (`ec2-scd-snowflake-us-west-2-tf`) — runs Docker with Apache NiFi and JupyterLab
+- **S3 Bucket** (`s3-scd-snowflake-us-east-1-tf`) — destination for NiFi file uploads; Snowpipe reads from here
+- **EC2 Instance** (`ec2-scd-snowflake-us-east-1-tf`) — runs Docker with Apache NiFi and JupyterLab
 - **IAM Role + Instance Profile** — grants the EC2 instance full S3 access
 - **Security Group** — allows SSH inbound; NiFi and JupyterLab are accessed via SSH port forwarding
-- **SSH Key Pair** — auto-generated RSA key; private key saved as `ec2-scd-snowflake-us-west-2-tf.pem`
+- **SSH Key Pair** — auto-generated RSA key; private key saved as `ec2-scd-snowflake-us-east-1-tf.pem`
 
 ---
 
@@ -18,7 +18,7 @@ This Terraform configuration provisions the AWS infrastructure required to run t
 aws configure
 ```
 
-Enter your AWS Access Key ID, Secret Access Key, and set the region to `us-west-2`.
+Enter your AWS Access Key ID, Secret Access Key, and set the region to `us-east-1`.
 
 2. Install [Terraform](https://developer.hashicorp.com/terraform/downloads).
 
@@ -79,8 +79,8 @@ terraform apply --auto-approve
 After `terraform apply`, fix permissions on the generated key file so SSH accepts it.
 
 ```
-icacls "ec2-scd-snowflake-us-west-2-tf.pem" /inheritance:r
-icacls "ec2-scd-snowflake-us-west-2-tf.pem" /grant:r "%USERNAME%:R"
+icacls "ec2-scd-snowflake-us-east-1-tf.pem" /inheritance:r
+icacls "ec2-scd-snowflake-us-east-1-tf.pem" /grant:r "%USERNAME%:R"
 ```
 
 ---
@@ -88,13 +88,13 @@ icacls "ec2-scd-snowflake-us-west-2-tf.pem" /grant:r "%USERNAME%:R"
 ### Step 7 — Connect to EC2
 
 ```
-ssh -i "ec2-scd-snowflake-us-west-2-tf.pem" ec2-user@<EC2_PUBLIC_DNS>
+ssh -i "ec2-scd-snowflake-us-east-1-tf.pem" ec2-user@<EC2_PUBLIC_DNS>
 ```
 
 To access NiFi and JupyterLab via SSH port forwarding:
 
 ```
-ssh -i "ec2-scd-snowflake-us-west-2-tf.pem" ec2-user@<EC2_PUBLIC_DNS> -L 2080:localhost:2080 -L 4888:localhost:4888 -L 8050:localhost:8050
+ssh -i "ec2-scd-snowflake-us-east-1-tf.pem" ec2-user@<EC2_PUBLIC_DNS> -L 2080:localhost:2080 -L 4888:localhost:4888 -L 8050:localhost:8050
 ```
 
 - NiFi UI: `http://localhost:2080/nifi/`
